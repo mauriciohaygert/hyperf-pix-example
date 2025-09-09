@@ -1,0 +1,129 @@
+services:
+  # Aplicação HyperF
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hyperf-pix-example-app
+    restart: unless-stopped
+    ports:
+      - "9501:9501"
+    volumes:
+      - .:/opt/www
+      - ./storage:/opt/www/storage
+    environment:
+      - TZ=America/Sao_Paulo
+      - APP_ENV=local
+      - APP_TIMEZONE=America/Sao_Paulo
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=hyperf_pix_example
+      - DB_USERNAME=root
+      - DB_PASSWORD=secret
+      - DB_TIMEZONE=-03:00
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MAIL_MAILER=smtp
+      - MAIL_HOST=mailhog
+      - MAIL_PORT=1025
+      - MAIL_USERNAME=null
+      - MAIL_PASSWORD=null
+      - MAIL_ENCRYPTION=null
+    depends_on:
+      - mysql
+      - redis
+      - mailhog
+    networks:
+      - hyperf-pix-example-network
+
+  # Nginx (Load Balancer)
+  nginx:
+    image: nginx:alpine
+    container_name: hyperf-pix-example-nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - app
+    networks:
+      - hyperf-pix-example-network
+
+  # MySQL 8
+  mysql:
+    image: mysql:8.0
+    container_name: hyperf-pix-example-mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      TZ: America/Sao_Paulo
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: hyperf_pix_example
+      MYSQL_USER: hyperf_pix
+      MYSQL_PASSWORD: secret
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - hyperf-pix-example-network
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    container_name: hyperf-pix-example-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - hyperf-pix-example-network
+
+  # Mailhog (Email Testing)
+  mailhog:
+    image: mailhog/mailhog
+    container_name: hyperf-pix-example-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - hyperf-pix-example-network
+
+  # Cron Job Service
+  cron:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hyperf-pix-example-cron
+    restart: unless-stopped
+    volumes:
+      - .:/opt/www
+    environment:
+      - TZ=America/Sao_Paulo
+      - APP_ENV=local
+      - APP_TIMEZONE=America/Sao_Paulo
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=hyperf_pix_example
+      - DB_USERNAME=root
+      - DB_PASSWORD=secret
+      - DB_TIMEZONE=-03:00
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - mysql
+      - redis
+    command: ["php", "bin/hyperf.php", "crontab:run"]
+    networks:
+      - hyperf-pix-example-network
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  hyperf-pix-example-network:
+    driver: bridge
