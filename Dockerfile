@@ -32,11 +32,15 @@ RUN set -ex \
     && echo -e "\033[42;37m Build Completed :).\033[0m\n"
 
 WORKDIR /opt/www
-COPY composer.json ./
-RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+# Copiar o script de entrada
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Copiar o código da aplicação
 COPY . /opt/www
-RUN composer dump-autoload --optimize
 
 EXPOSE 9501
 
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["php", "bin/hyperf.php", "start"]

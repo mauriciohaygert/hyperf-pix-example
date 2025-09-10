@@ -1,0 +1,25 @@
+# Ignorar diretório vendor local durante o build
+vendor/
+
+# Ignorar arquivos de desenvolvimento
+.git/
+.gitignore
+.env
+.env.example
+README.md
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# Ignorar arquivos de IDE
+.idea/
+.vscode/
+
+# Ignorar logs e cache
+storage/logs/
+storage/cache/
+storage/sessions/
+
+# Ignorar arquivos de teste
+test/
+.phpunit.result.cache
