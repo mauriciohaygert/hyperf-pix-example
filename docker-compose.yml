@@ -7,28 +7,38 @@ services:
     container_name: hyperf-pix-example-app
     restart: unless-stopped
     ports:
-      - "9501:9501"
+      - "${APP_PORT}:9501"
     volumes:
       - .:/opt/www
       - ./storage:/opt/www/storage
     environment:
-      - TZ=America/Sao_Paulo
-      - APP_ENV=local
-      - APP_TIMEZONE=America/Sao_Paulo
+      - APP_NAME=${APP_NAME}
+      - APP_ENV=${APP_ENV}
+      - APP_KEY=${APP_KEY}
+      - APP_TIMEZONE=${APP_TIMEZONE}
+      - DB_DRIVER=${DB_DRIVER}
       - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_DATABASE=hyperf_pix_example
-      - DB_USERNAME=root
-      - DB_PASSWORD=secret
-      - DB_TIMEZONE=-03:00
+      - DB_PORT=${DB_PORT}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_CHARSET=${DB_CHARSET}
+      - DB_COLLATION=${DB_COLLATION}
+      - DB_PREFIX=${DB_PREFIX}
       - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - MAIL_MAILER=smtp
+      - REDIS_AUTH=${REDIS_AUTH}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_DB=${REDIS_DB}
+      - MAIL_MAILER=${MAIL_MAILER}
       - MAIL_HOST=mailhog
-      - MAIL_PORT=1025
-      - MAIL_USERNAME=null
-      - MAIL_PASSWORD=null
-      - MAIL_ENCRYPTION=null
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_ENCRYPTION=${MAIL_ENCRYPTION}
+      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}
+      - MAIL_FROM_NAME=${MAIL_FROM_NAME}
+      - PIX_SCHEDULE_MAX_DAYS=${PIX_SCHEDULE_MAX_DAYS}
+      - PIX_ALLOWED_TYPES=${PIX_ALLOWED_TYPES}
     depends_on:
       - mysql
       - redis
@@ -42,7 +52,7 @@ services:
     container_name: hyperf-pix-example-nginx
     restart: unless-stopped
     ports:
-      - "8080:80"
+      - "${NGINX_PORT}:80"
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
@@ -56,13 +66,13 @@ services:
     container_name: hyperf-pix-example-mysql
     restart: unless-stopped
     ports:
-      - "3306:3306"
+      - "${MYSQL_PORT}:3306"
     environment:
-      TZ: America/Sao_Paulo
-      MYSQL_ROOT_PASSWORD: secret
-      MYSQL_DATABASE: hyperf_pix_example
-      MYSQL_USER: hyperf_pix
-      MYSQL_PASSWORD: secret
+      TZ: ${APP_TIMEZONE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
       - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -75,7 +85,7 @@ services:
     container_name: hyperf-pix-example-redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT}:6379"
     volumes:
       - redis_data:/data
     networks:
@@ -87,8 +97,8 @@ services:
     container_name: hyperf-pix-example-mailhog
     restart: unless-stopped
     ports:
-      - "1025:1025"  # SMTP
-      - "8025:8025"  # Web UI
+      - "${MAILHOG_SMTP_PORT}:1025"  # SMTP
+      - "${MAILHOG_WEB_PORT}:8025"  # Web UI
     networks:
       - hyperf-pix-example-network
 
@@ -102,17 +112,25 @@ services:
     volumes:
       - .:/opt/www
     environment:
-      - TZ=America/Sao_Paulo
-      - APP_ENV=local
-      - APP_TIMEZONE=America/Sao_Paulo
+      - APP_NAME=${APP_NAME}
+      - APP_ENV=${APP_ENV}
+      - APP_KEY=${APP_KEY}
+      - APP_TIMEZONE=${APP_TIMEZONE}
+      - DB_DRIVER=${DB_DRIVER}
       - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_DATABASE=hyperf_pix_example
-      - DB_USERNAME=root
-      - DB_PASSWORD=secret
-      - DB_TIMEZONE=-03:00
+      - DB_PORT=${DB_PORT}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_CHARSET=${DB_CHARSET}
+      - DB_COLLATION=${DB_COLLATION}
+      - DB_PREFIX=${DB_PREFIX}
       - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - REDIS_AUTH=${REDIS_AUTH}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_DB=${REDIS_DB}
+      - PIX_SCHEDULE_MAX_DAYS=${PIX_SCHEDULE_MAX_DAYS}
+      - PIX_ALLOWED_TYPES=${PIX_ALLOWED_TYPES}
     depends_on:
       - mysql
       - redis
