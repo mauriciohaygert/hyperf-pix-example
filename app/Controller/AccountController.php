@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Enum\ErrorCode;
 use App\Repository\AccountRepository;
 use Hyperf\HttpServer\Annotation\Controller;
 use Hyperf\HttpServer\Annotation\GetMapping;
-use Hyperf\HttpServer\Contract\RequestInterface;
-use Hyperf\HttpServer\Contract\ResponseInterface;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\Logger\LoggerFactory;
 use Psr\Log\LoggerInterface;
@@ -27,18 +26,16 @@ class AccountController extends AbstractController
     }
 
     #[GetMapping(path: '/account/{accountId}')]
-    public function getAccount(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    public function getAccount(): \Psr\Http\Message\ResponseInterface
     {
         try {
-            $accountId = $request->route('accountId');
+            $accountId = $this->request->route('accountId');
             
             $account = $this->accountRepository->findById($accountId);
             
             if (!$account) {
-                return $this->response->json([
-                    'error' => 'Account not found',
-                    'code' => 'ACCOUNT_NOT_FOUND'
-                ])->withStatus(404);
+                $errorCode = ErrorCode::ACCOUNT_NOT_FOUND;
+                return $errorCode->getResponse($this->response);
             }
 
             return $this->response->json([
@@ -53,30 +50,29 @@ class AccountController extends AbstractController
 
         } catch (\Exception $e) {
             $this->logger->error('Error getting account', [
-                'account_id' => $request->route('accountId'),
+                'account_id' => $this->request->route('accountId'),
                 'error' => $e->getMessage(),
             ]);
 
+            $errorCode = ErrorCode::INTERNAL_ERROR;
             return $this->response->json([
-                'error' => 'Internal server error',
-                'code' => 'INTERNAL_ERROR'
-            ])->withStatus(500);
+                'error' => $errorCode->getMessage(),
+                'code' => $errorCode->value
+            ])->withStatus($errorCode->getHttpStatus());
         }
     }
 
     #[GetMapping(path: '/account/{accountId}/balance')]
-    public function getBalance(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    public function getBalance(): \Psr\Http\Message\ResponseInterface
     {
         try {
-            $accountId = $request->route('accountId');
+            $accountId = $this->request->route('accountId');
             
             $account = $this->accountRepository->findById($accountId);
             
             if (!$account) {
-                return $this->response->json([
-                    'error' => 'Account not found',
-                    'code' => 'ACCOUNT_NOT_FOUND'
-                ])->withStatus(404);
+                $errorCode = ErrorCode::ACCOUNT_NOT_FOUND;
+                return $errorCode->getResponse($this->response);
             }
 
             return $this->response->json([
@@ -89,14 +85,15 @@ class AccountController extends AbstractController
 
         } catch (\Exception $e) {
             $this->logger->error('Error getting balance', [
-                'account_id' => $request->route('accountId'),
+                'account_id' => $this->request->route('accountId'),
                 'error' => $e->getMessage(),
             ]);
 
+            $errorCode = ErrorCode::INTERNAL_ERROR;
             return $this->response->json([
-                'error' => 'Internal server error',
-                'code' => 'INTERNAL_ERROR'
-            ])->withStatus(500);
+                'error' => $errorCode->getMessage(),
+                'code' => $errorCode->value
+            ])->withStatus($errorCode->getHttpStatus());
         }
     }
 }

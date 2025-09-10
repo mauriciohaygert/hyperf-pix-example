@@ -13,6 +13,7 @@
     "license": "Apache-2.0",
     "require": {
         "php": ">=8.1",
+        "hyperf/async-queue": "^3.1",
         "hyperf/cache": "~3.1.0",
         "hyperf/command": "~3.1.0",
         "hyperf/config": "~3.1.0",
@@ -25,6 +26,7 @@
         "hyperf/http-server": "~3.1.0",
         "hyperf/logger": "~3.1.0",
         "hyperf/memory": "~3.1.0",
+        "hyperf/migration-generator": "^3.1",
         "hyperf/process": "~3.1.0",
         "hyperf/redis": "~3.1.0",
         "hyperf/swagger": "^3.1",

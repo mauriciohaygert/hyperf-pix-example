@@ -5,15 +5,28 @@ declare(strict_types=1);
 namespace App\Domain\DTO;
 
 use Carbon\Carbon;
+use Hyperf\Logger\LoggerFactory;
+use Psr\Log\LoggerInterface;
 
 class WithdrawRequestDTO
 {
+    private static ?LoggerInterface $logger = null;
+
     public function __construct(
         public readonly string $method,
         public readonly array $pix,
         public readonly float $amount,
         public readonly ?string $schedule = null
     ) {}
+
+    private static function getLogger(): LoggerInterface
+    {
+        if (self::$logger === null) {
+            $loggerFactory = \Hyperf\Context\ApplicationContext::getContainer()->get(LoggerFactory::class);
+            self::$logger = $loggerFactory->get('withdraw-request-dto');
+        }
+        return self::$logger;
+    }
 
     public function getPixType(): string
     {
@@ -39,7 +52,16 @@ class WithdrawRequestDTO
         try {
             return Carbon::parse($this->schedule, \Hyperf\Config\config('app_timezone'));
         } catch (\Exception $e) {
-            return null;
+            self::getLogger()->error('Failed to parse scheduled date', [
+                'schedule' => $this->schedule,
+                'timezone' => \Hyperf\Config\config('app_timezone'),
+                'error' => $e->getMessage(),
+            ]);
+            
+            // Lança exceção em vez de retornar null silenciosamente
+            throw new \InvalidArgumentException(
+                "Invalid scheduled date format: {$this->schedule}. Error: {$e->getMessage()}"
+            );
         }
     }
 

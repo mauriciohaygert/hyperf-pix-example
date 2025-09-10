@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Domain\DTO\WithdrawRequestDTO;
+use App\Enum\ErrorCode;
 use App\Service\WithdrawService;
 use App\Repository\AccountWithdrawRepository;
 use Hyperf\HttpServer\Annotation\Controller;
@@ -62,11 +63,8 @@ class WithdrawController extends AbstractController
             ]);
 
             if ($validator->fails()) {
-                return $this->response->json([
-                    'error' => 'Validation failed',
-                    'code' => 'VALIDATION_ERROR',
-                    'details' => $validator->errors()
-                ])->withStatus(422);
+                $errorCode = ErrorCode::VALIDATION_ERROR;
+                return $errorCode->getResponse($this->response, $validator->errors()->all());
             }
 
             if (!empty($data['schedule'])) {
@@ -74,10 +72,11 @@ class WithdrawController extends AbstractController
                 $maxDate = \Carbon\Carbon::now(\Hyperf\Config\config('app_timezone'))->addDays(7);
                 
                 if ($scheduleDate > $maxDate) {
+                    $errorCode = ErrorCode::SCHEDULE_TOO_FAR;
                     return $this->response->json([
-                        'error' => 'Cannot schedule more than 7 days in advance',
-                        'code' => 'SCHEDULE_TOO_FAR'
-                    ])->withStatus(422);
+                        'error' => $errorCode->getMessage(),
+                        'code' => $errorCode->value
+                    ])->withStatus($errorCode->getHttpStatus());
                 }
             }
 
@@ -92,10 +91,11 @@ class WithdrawController extends AbstractController
             ])->withStatus(201);
 
         } catch (\InvalidArgumentException $e) {
+            $errorCode = ErrorCode::INVALID_REQUEST;
             return $this->response->json([
                 'error' => $e->getMessage(),
-                'code' => 'INVALID_REQUEST'
-            ])->withStatus(400);
+                'code' => $errorCode->value
+            ])->withStatus($errorCode->getHttpStatus());
 
         } catch (\Exception $e) {
             $this->logger->error('Error processing withdraw', [
@@ -104,10 +104,11 @@ class WithdrawController extends AbstractController
                 'trace' => $e->getTraceAsString(),
             ]);
 
+            $errorCode = ErrorCode::INTERNAL_ERROR;
             return $this->response->json([
-                'error' => 'Internal server error',
-                'code' => 'INTERNAL_ERROR'
-            ])->withStatus(500);
+                'error' => $errorCode->getMessage(),
+                'code' => $errorCode->value
+            ])->withStatus($errorCode->getHttpStatus());
         }
     }
 
@@ -136,10 +137,11 @@ class WithdrawController extends AbstractController
                 'error' => $e->getMessage(),
             ]);
 
+            $errorCode = ErrorCode::INTERNAL_ERROR;
             return $this->response->json([
-                'error' => 'Internal server error',
-                'code' => 'INTERNAL_ERROR'
-            ])->withStatus(500);
+                'error' => $errorCode->getMessage(),
+                'code' => $errorCode->value
+            ])->withStatus($errorCode->getHttpStatus());
         }
     }
 
@@ -154,10 +156,8 @@ class WithdrawController extends AbstractController
             $withdraw = $this->withdrawRepository->findById($withdrawId);
 
             if (!$withdraw || $withdraw->account_id !== $accountId) {
-                return $this->response->json([
-                    'error' => 'Withdraw not found',
-                    'code' => 'WITHDRAW_NOT_FOUND'
-                ])->withStatus(404);
+                $errorCode = ErrorCode::WITHDRAW_NOT_FOUND;
+                return $errorCode->getResponse($this->response);
             }
 
             $result = \App\Domain\DTO\WithdrawResponseDTO::fromModel($withdraw);
@@ -173,10 +173,11 @@ class WithdrawController extends AbstractController
                 'error' => $e->getMessage(),
             ]);
 
+            $errorCode = ErrorCode::INTERNAL_ERROR;
             return $this->response->json([
-                'error' => 'Internal server error',
-                'code' => 'INTERNAL_ERROR'
-            ])->withStatus(500);
+                'error' => $errorCode->getMessage(),
+                'code' => $errorCode->value
+            ])->withStatus($errorCode->getHttpStatus());
         }
     }
 }
