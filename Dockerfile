@@ -32,7 +32,11 @@ RUN set -ex \
     && echo -e "\033[42;37m Build Completed :).\033[0m\n"
 
 WORKDIR /opt/www
+COPY composer.json ./
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 COPY . /opt/www
-RUN composer install && php bin/hyperf.php
+RUN composer dump-autoload --optimize
 
 EXPOSE 9501
+
+CMD ["php", "bin/hyperf.php", "start"]

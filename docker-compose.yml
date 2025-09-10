@@ -9,7 +9,6 @@ services:
     ports:
       - "${APP_PORT}:9501"
     volumes:
-      - .:/opt/www
       - ./storage:/opt/www/storage
     environment:
       - APP_NAME=${APP_NAME}
@@ -110,7 +109,7 @@ services:
     container_name: hyperf-pix-example-cron
     restart: unless-stopped
     volumes:
-      - .:/opt/www
+      - ./storage:/opt/www/storage
     environment:
       - APP_NAME=${APP_NAME}
       - APP_ENV=${APP_ENV}
