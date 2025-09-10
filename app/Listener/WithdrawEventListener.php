@@ -10,16 +10,17 @@ use App\Service\EmailService;
 use Hyperf\Event\Annotation\Listener;
 use Hyperf\Event\Contract\ListenerInterface;
 use Hyperf\Logger\LoggerFactory;
+use Hyperf\Redis\Redis;
 use Psr\Log\LoggerInterface;
 
 #[Listener]
 class WithdrawEventListener implements ListenerInterface
 {
     private LoggerInterface $logger;
-    private static array $processedEvents = [];
 
     public function __construct(
         private EmailService $emailService,
+        private Redis $redis,
         LoggerFactory $loggerFactory
     ) {
         $this->logger = $loggerFactory->get('withdraw-listener');
@@ -35,18 +36,6 @@ class WithdrawEventListener implements ListenerInterface
 
     public function process(object $event): void
     {
-        $eventKey = $this->getEventKey($event);
-        
-        if (isset(self::$processedEvents[$eventKey])) {
-            $this->logger->info('Event already processed, skipping', [
-                'event_key' => $eventKey,
-                'event_type' => get_class($event),
-            ]);
-            return;
-        }
-        
-        self::$processedEvents[$eventKey] = true;
-        
         if ($event instanceof WithdrawProcessed) {
             $this->processEmailNotification($event);
         } elseif ($event instanceof WithdrawScheduled) {
@@ -56,9 +45,25 @@ class WithdrawEventListener implements ListenerInterface
 
     private function processEmailNotification(WithdrawProcessed $event): void
     {
+        $eventKey = 'email_sent:' . $event->withdraw->id . '_' . ($event->success ? 'success' : 'error');
+        
+        if ($this->redis->exists($eventKey)) {
+            $this->logger->info('Email notification already sent, skipping duplicate', [
+                'withdraw_id' => $event->withdraw->id,
+                'event_key' => $eventKey,
+            ]);
+            return;
+        }
+        $this->redis->setex($eventKey, 3600, '1');
+        
         try {
             $this->emailService->sendWithdrawNotification($event->withdraw, $event->success, $event->errorMessage);
+            $this->logger->info('Email notification sent successfully', [
+                'withdraw_id' => $event->withdraw->id,
+                'event_key' => $eventKey,
+            ]);
         } catch (\Exception $e) {
+            $this->redis->del($eventKey);
             $this->logger->error('Failed to send email notification', [
                 'withdraw_id' => $event->withdraw->id,
                 'error' => $e->getMessage(),
@@ -68,6 +73,17 @@ class WithdrawEventListener implements ListenerInterface
 
     private function processScheduledEmailNotification(WithdrawScheduled $event): void
     {
+        $eventKey = 'email_sent:' . $event->withdraw->id . '_scheduled';
+        
+        if ($this->redis->exists($eventKey)) {
+            $this->logger->info('Scheduled email notification already sent, skipping duplicate', [
+                'withdraw_id' => $event->withdraw->id,
+                'event_key' => $eventKey,
+            ]);
+            return;
+        }
+        $this->redis->setex($eventKey, 3600, '1');
+        
         $this->logger->info('Event received - processing scheduled email notification', [
             'withdraw_id' => $event->withdraw->id,
             'event_type' => 'App\\Domain\\Event\\WithdrawScheduled',
@@ -77,23 +93,14 @@ class WithdrawEventListener implements ListenerInterface
             $this->emailService->sendScheduledWithdrawNotification($event->withdraw);
             $this->logger->info('Scheduled email notification sent successfully', [
                 'withdraw_id' => $event->withdraw->id,
+                'event_key' => $eventKey,
             ]);
         } catch (\Exception $e) {
+            $this->redis->del($eventKey);
             $this->logger->error('Failed to send scheduled withdraw email notification', [
                 'withdraw_id' => $event->withdraw->id,
                 'error' => $e->getMessage(),
             ]);
         }
-    }
-
-    private function getEventKey(object $event): string
-    {
-        if ($event instanceof WithdrawProcessed) {
-            return 'processed_' . $event->withdraw->id . '_' . ($event->success ? 'success' : 'error');
-        } elseif ($event instanceof WithdrawScheduled) {
-            return 'scheduled_' . $event->withdraw->id;
-        }
-        
-        return 'unknown_' . get_class($event) . '_' . spl_object_hash($event);
     }
 }

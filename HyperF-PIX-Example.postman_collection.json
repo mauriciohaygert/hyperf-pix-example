@@ -1,0 +1,251 @@
+{
+	"info": {
+		"_postman_id": "hyperf-pix-example",
+		"name": "HyperF PIX Example API",
+		"description": "Collection para testar a API de saques PIX criada com HyperF 3",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "hyperf-pix-example"
+	},
+	"item": [
+		{
+			"name": "API Info",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						""
+					]
+				},
+				"description": "Informações gerais da API"
+			},
+			"response": []
+		},
+		{
+			"name": "Account",
+			"item": [
+				{
+					"name": "Get Account Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/account/{{account_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"account",
+								"{{account_id}}"
+							]
+						},
+						"description": "Obter detalhes de uma conta específica"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Account Balance",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/account/{{account_id}}/balance",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"account",
+								"{{account_id}}",
+								"balance"
+							]
+						},
+						"description": "Obter saldo de uma conta específica"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints relacionados a contas"
+		},
+		{
+			"name": "Withdraw",
+			"item": [
+				{
+					"name": "Create Withdraw (Immediate)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"PIX\",\n    \"pix\": {\n        \"type\": \"email\",\n        \"key\": \"joao.silva@example.com\"\n    },\n    \"amount\": 100.50\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/account/{{account_id}}/balance/withdraw",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"account",
+								"{{account_id}}",
+								"balance",
+								"withdraw"
+							]
+						},
+						"description": "Criar um saque imediato via PIX"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Withdraw (Scheduled)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"PIX\",\n    \"pix\": {\n        \"type\": \"email\",\n        \"key\": \"maria.santos@example.com\"\n    },\n    \"amount\": 250.75,\n    \"schedule\": \"2024-09-15 14:30:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/account/{{account_id}}/balance/withdraw",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"account",
+								"{{account_id}}",
+								"balance",
+								"withdraw"
+							]
+						},
+						"description": "Criar um saque agendado via PIX (máximo 7 dias)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Withdraw History",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/account/{{account_id}}/withdraws?limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"account",
+								"{{account_id}}",
+								"withdraws"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Número máximo de registros (1-100)"
+								}
+							]
+						},
+						"description": "Obter histórico de saques de uma conta"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Withdraw Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/account/{{account_id}}/withdraws/{{withdraw_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"account",
+								"{{account_id}}",
+								"withdraws",
+								"{{withdraw_id}}"
+							]
+						},
+						"description": "Obter detalhes de um saque específico"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints relacionados a saques PIX"
+		},
+		{
+			"name": "Documentation",
+			"item": [
+				{
+					"name": "Swagger Documentation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/swagger",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"swagger"
+							]
+						},
+						"description": "Documentação interativa da API via Swagger"
+					},
+					"response": []
+				}
+			],
+			"description": "Documentação da API"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "account_id",
+			"value": "30237cff-f808-4ae1-a170-f2bd8b1c60f2",
+			"type": "string",
+			"description": "ID da conta do João Silva (exemplo)"
+		},
+		{
+			"key": "withdraw_id",
+			"value": "",
+			"type": "string",
+			"description": "ID do saque (será preenchido após criar um saque)"
+		}
+	]
+}

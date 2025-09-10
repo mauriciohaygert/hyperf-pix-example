@@ -13,6 +13,12 @@ class AccountSeeder extends Seeder
      */
     public function run()
     {
+        $existingAccounts = Db::table('account')->count();
+        if ($existingAccounts > 0) {
+            echo "Contas já existem no banco ({$existingAccounts} registros). Pulando seeder...\n";
+            return;
+        }
+
         $accounts = [
             [
                 'id' => Uuid::uuid4()->toString(),
@@ -44,8 +50,32 @@ class AccountSeeder extends Seeder
             ],
         ];
 
+        $createdAccounts = [];
         foreach ($accounts as $account) {
             Db::table('account')->insert($account);
+            $createdAccounts[] = $account;
         }
+
+        $this->saveClientIdsToFile($createdAccounts);
+    }
+
+    private function saveClientIdsToFile(array $accounts): void
+    {
+        $storagePath = BASE_PATH . '/storage/client_ids.txt';
+        
+        $content = "=== IDs dos Clientes Criados ===\n";
+        $content .= "Data: " . date('Y-m-d H:i:s') . "\n\n";
+        
+        foreach ($accounts as $account) {
+            $content .= "Nome: {$account['name']}\n";
+            $content .= "ID: {$account['id']}\n";
+            $content .= "Saldo: R$ " . number_format($account['balance'], 2, ',', '.') . "\n";
+            $content .= "---\n";
+        }
+        
+        file_put_contents($storagePath, $content);
+        
+        echo "IDs dos clientes salvos em: {$storagePath}\n";
+        echo $content;
     }
 }

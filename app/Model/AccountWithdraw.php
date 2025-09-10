@@ -98,6 +98,6 @@ class AccountWithdraw extends Model
             return true;
         }
 
-        return $this->scheduled_for <= Carbon::now(config('app_timezone'));
+        return $this->scheduled_for <= Carbon::now(\Hyperf\Config\config('app_timezone'));
     }
 }
