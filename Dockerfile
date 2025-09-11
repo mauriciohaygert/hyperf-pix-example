@@ -36,13 +36,13 @@ RUN addgroup -g 1000 appuser && \
 
 WORKDIR /opt/www
     
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+# COPY docker-entrypoint.sh /usr/local/bin/
+# RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 COPY . /opt/www
 RUN cp -n env.example .env
 RUN composer install --optimize-autoloader
-RUN chown -R appuser:appuser /opt/www && \
-    chown -R appuser:appuser /usr/local/bin/docker-entrypoint.sh
+RUN chown -R appuser:appuser /opt/www
+# RUN chown -R appuser:appuser /usr/local/bin/docker-entrypoint.sh
 
 USER appuser
 EXPOSE 9501

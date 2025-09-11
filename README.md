@@ -41,7 +41,10 @@ cp env.example .env
 docker compose up -d
 ```
 
-3. **Execute as migrações e seeders:**
+3. **Aguarde oExecute as migrações e seeders:**
+
+> **Aguarde alguns segundos até o container Mysql estar pronto**
+
 ```bash
 # Executar script (Linux) que executa Migrate e Seed
 ./migrate.sh
