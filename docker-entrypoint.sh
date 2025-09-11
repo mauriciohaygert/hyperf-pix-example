@@ -8,7 +8,7 @@ ls -la
 
 if [ ! -f "vendor/autoload.php" ]; then
     echo "Instalando dependências do Composer..."
-    composer install
+    composer install --no-dev --optimize-autoloader
     echo "Dependências instaladas com sucesso!"
 else
     echo "Dependências já estão instaladas."
