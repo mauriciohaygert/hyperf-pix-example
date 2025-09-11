@@ -19,7 +19,6 @@ docker-compose ps
 echo ""
 echo "🌐 URLs disponíveis:"
 echo "   • Aplicação: http://localhost:8080"
-echo "   • Swagger: http://localhost:8080/swagger"
 echo "   • Mailhog: http://localhost:8025"
 echo ""
 echo "📝 Para ver os logs: docker-compose logs -f"

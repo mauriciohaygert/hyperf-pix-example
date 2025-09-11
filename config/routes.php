@@ -15,8 +15,7 @@ Router::get('/', function () {
             'POST /account/{accountId}/balance/withdraw' => 'Create withdraw request',
             'GET /account/{accountId}/withdraws' => 'Get withdraw history',
             'GET /account/{accountId}/withdraws/{withdrawId}' => 'Get specific withdraw',
-        ],
-        'documentation' => '/swagger',
+        ]
     ];
 });
 

@@ -35,13 +35,20 @@ cd hyperf-pix-example
 ```bash
 # Executar script (Linux) que copia .env e inicia os containers
 ./start.sh
+
+## EXECUTAR MANUALMENTE
+cp env.example .env
+docker compose up -d
 ```
 
 3. **Execute as migrações e seeders:**
 ```bash
+# Executar script (Linux) que executa Migrate e Seed
+./migrate.sh
+
+## EXECUTAR MANUALMENTE
 # Executar migrações do banco de dados
 docker-compose exec app php bin/hyperf.php migrate
-
 # Executar seeders para criar dados de teste
 docker-compose exec app php bin/hyperf.php db:seed
 ```

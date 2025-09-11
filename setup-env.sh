@@ -5,9 +5,9 @@ echo "=== Configurando ambiente ==="
 
 # Verificar se o arquivo .env existe, se não, criar baseado no .env.example
 if [ ! -f ".env" ]; then
-    if [ -f ".env.example" ]; then
+    if [ -f "env.example" ]; then
         echo "Criando arquivo .env baseado no .env.example..."
-        cp .env.example .env
+        cp env.example .env
         echo "✅ Arquivo .env criado com sucesso!"
     else
         echo "❌ ERRO: Arquivo .env.example não encontrado!"

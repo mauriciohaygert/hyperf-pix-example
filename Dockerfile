@@ -31,16 +31,20 @@ RUN set -ex \
     && rm -rf /var/cache/apk/* /tmp/* /usr/share/man \
     && echo -e "\033[42;37m Build Completed :).\033[0m\n"
 
-WORKDIR /opt/www
+RUN addgroup -g 1000 appuser && \
+    adduser -D -s /bin/sh -u 1000 -G appuser appuser
 
-# Copiar o script de entrada
+WORKDIR /opt/www
+    
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
-# Copiar o código da aplicação
 COPY . /opt/www
+RUN cp -n env.example .env
+RUN composer install --optimize-autoloader
+RUN chown -R appuser:appuser /opt/www && \
+    chown -R appuser:appuser /usr/local/bin/docker-entrypoint.sh
 
+USER appuser
 EXPOSE 9501
 
-ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["php", "bin/hyperf.php", "start"]

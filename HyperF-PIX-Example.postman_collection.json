@@ -183,30 +183,6 @@
 				}
 			],
 			"description": "Endpoints relacionados a saques PIX"
-		},
-		{
-			"name": "Documentation",
-			"item": [
-				{
-					"name": "Swagger Documentation",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/swagger",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"swagger"
-							]
-						},
-						"description": "Documentação interativa da API via Swagger"
-					},
-					"response": []
-				}
-			],
-			"description": "Documentação da API"
 		}
 	],
 	"event": [
